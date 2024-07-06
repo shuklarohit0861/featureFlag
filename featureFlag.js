@@ -12,6 +12,7 @@ const MAX_TTL = 100000;
 
 let featureFlagsPromise;
 
+//backend call
 function fetchAllFeature() {
   const isCache = Object.keys(Cache.featureFlags).length > 0;
   const timeStamp = Date.now() - Cache.timeStamp < MAX_TTL;
@@ -22,10 +23,13 @@ function fetchAllFeature() {
       resolve(Cache.featureFlags);
     });
   }
+
+  //if the feature is pending
   if (featureFlagsPromise) {
     console.log("=== promise +++");
     return featureFlagsPromise;
   }
+  
   featureFlagsPromise = new Promise((resolve) => {
     console.log("=== backEnd +++");
     setTimeout(() => {
@@ -33,6 +37,8 @@ function fetchAllFeature() {
       Cache.timeStamp = Date.now();
       resolve(SAMPLE_FEATURES);
     }, 100);
+  }).finally(() => {
+    featureFlagsPromise = null;
   });
   return featureFlagsPromise;
 }
@@ -64,3 +70,9 @@ setTimeout(() => {
 getFeatureState("show_dialog_box", false).then((isEnabled) => {
   console.log(" -----show_dialog_box", isEnabled);
 });
+
+setTimeout(() => {
+  getFeatureState("enable_new_pricing", false).then((isEnabled) => {
+    console.log(" ----- enable_new_pricing", isEnabled);
+  });
+}, 200000);
